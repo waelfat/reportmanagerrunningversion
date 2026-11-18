@@ -1,0 +1,51 @@
+﻿@using reportmangerv2.Components
+@model CategoryVM
+@{
+    var hasChildren = Model.ChildCategories.Any() || Model.Reports.Any();
+    var categoryId = "category-" + Model.CategoryId.Replace(" ", "-").ToLower();
+}
+
+@if (hasChildren)
+{
+    <li class="nav-item mb-1">
+        <button class="btn btn-toggle collapsed" 
+                type="button" 
+                data-bs-toggle="collapse" 
+                data-bs-target="#@categoryId" 
+                aria-expanded="false"
+                aria-controls="@categoryId">
+            @Model.CategoryName
+        </button>
+
+        <div class="collapse" id="@categoryId">
+            <ul class="btn-toggle-nav list-unstyled">
+                @foreach (var childCategory in Model.ChildCategories)
+                {
+                    @await Html.PartialAsync("_Category", childCategory)
+                }
+                @foreach (var report in Model.Reports)
+                {
+                    @if (!string.IsNullOrEmpty(report.ReportId))
+                    {
+                        <li class="nav-item">
+                            <a href="#" 
+                               data-report-id="@report.ReportId" 
+                               class="load-report nav-link"
+                               title="@report.ReportName">
+                                @report.ReportName
+                            </a>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+    </li>
+}
+else
+{
+    <li class="nav-item mb-1">
+        <span class="nav-link text-muted">
+            <i class="fas fa-folder-open me-2"></i>@Model.CategoryName
+        </span>
+    </li>
+}

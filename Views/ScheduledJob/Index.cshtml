@@ -1,0 +1,117 @@
+﻿@model List<ScheduledJobViewModel>
+@{
+     ViewData["Title"] = "Schemas";
+    string? successMessage = ViewBag.SuccessMessage as string;  
+
+}
+<style>
+    .card {
+        max-height: calc(100vh - 200px);
+        @* overflow-y: auto; *@
+        width: 100%;
+    }
+    thead th {
+        position: sticky;
+        top: 0;
+        background-color: #f8f9fa; /* Adjust this color to match your theme */
+        z-index: 1;
+    }
+   label {
+        font-weight:  bold;
+        white-space: nowrap !important;
+    }
+    
+</style>
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-calendar me-2"></i>Scheduled Jobs</h2>
+        <a href="@Url.Action("Create")" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Create Scheduled Job
+        </a>
+    </div>
+    @if (Model != null && Model.Any())
+    {
+        <div class="card" >
+            <div class="card-body">
+                @*make table scrollable and take the rest of the window hieght  *@
+
+                <div class="table-responsive" style="max-height: calc(100vh - 200px); overflow-y: auto;width: 100%;">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                @* add serial column *@
+                                <th class="text-nowrap">#</th>
+                                <th class="text-nowrap"><i class="fas fa-align-left me-2"></i>Description</th>
+                                <th class="text-nowrap"><i class="fas fa-toggle-on me-2"></i>IsActive</th>
+                                <th class="text-nowrap"><i class="fas fa-database me-2"></i>Schema</th>
+                                <th class="text-nowrap"><i class="fas fa-cogs me-2"></i>ProcedureName</th>
+                                <th class="text-nowrap"><i class="fas fa-clock me-2"></i>CronExpression</th>
+                                <th class="text-nowrap"><i class="fas fa-calendar-alt me-2"></i>NextRunAt</th>
+                                <th class="text-nowrap"><i class="fas fa-calendar-plus me-2"></i>CreatedAt</th>
+                                <th class="text-nowrap"><i class="fas fa-user me-2"></i>CreatedBy</th>
+                                <th class="text-nowrap" class="text-center"><i class="fas fa-cog me-2"></i>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach(var job in Model)
+                            {
+                                <tr>
+                                    @* add serial column *@
+                                    <td>@(Model.IndexOf(job) + 1)</td>
+                                    <td class="fw-semibold">@job.Description</td>
+                                    <td>@job.IsActive</td>
+                                    <td>@job.Schema</td>
+                                    <td>@job.ProcedureName</td>
+                                    <td data-cron="@job.CronExpression">@job.CronExpression</td>
+                                    <td>@job.NextRunAt</td>
+                                    <td>@job.CreatedAt</td>
+                                    <td>@job.CreatedBy</td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm">
+                                            <a asp-controller="ScheduledJob" asp-action="Details" asp-route-id="@job.Id" class="btn btn-outline-info" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a asp-controller="ScheduledJob" asp-action="Edit" asp-route-id="@job.Id" class="btn btn-outline-primary" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a asp-controller="ScheduledJob" asp-action="Delete" asp-route-id="@job.Id" class="btn btn-outline-danger" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                               <a asp-controller="ScheduledJob" asp-action="GetJobExecutions" asp-route-id="@job.Id" class="btn btn-outline-secondary" title="View Executions">
+                                                   <i class="fas fa-tasks"></i>
+                                               </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>No scheduled jobs found. Create your first scheduled job to get started.
+        </div>
+    }
+</div>
+@section Scripts{
+    <link rel="stylesheet" href="~/lib/fontawesome/css/all.min.css">
+    <script src="~/lib/cronstrue/dist/cronstrue.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cronCells = document.querySelectorAll('[data-cron]');
+            cronCells.forEach(function(cell) {
+                const cronExpression = cell.getAttribute('data-cron');
+                try {
+                    const humanReadable = cronstrue.toString(cronExpression, { verbose: true });
+                    cell.textContent = humanReadable;
+                } catch (e) {
+                    console.error('Error parsing cron expression:', cronExpression, e);
+                }
+            });
+        });
+    </script>
+}
